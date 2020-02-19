@@ -10,9 +10,12 @@ This script allows you to automate your migration from Office 2016, to Office365
 
 2.) Create the Deployment Folder
 - Name the folder 'OfficeLocal'
+- Place the folder in Temp
 
-3.) Put in the XMLs and Office Deployment Tool (setup.exe) in this folder:
+3.) Put in the XMLs and Office Deployment Tool (setup.exe) in the 'OfficeLocal' folder:
 - Office365: Office365ProPlus.xml
 - Office365 w/Visio: Office365VisioProPlus.xml
 - Office365 w/Project: Office365ProjectProPlus.xml
 - Office365 w/Project and Visio: Office365VisioProjectProPlus.xml
+
+Note: please name the Office365 folders w/the exact names as shown.  The script references them.  If you want to name it something else, you will need to update the script.  
