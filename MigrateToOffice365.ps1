@@ -11,13 +11,12 @@ By John Hawkins | johnhawkins3d@gmail.com
 ### Variables ###
 $logFile = ( ($env:computername | Select-Object) + "_" + "InstallOffice365ProPlus" + "_" + (Get-Date -Format "MM_dd_yyyy") ) # Name of logfile that is stored in C:\Temp
 
+### Object ###
 $officeApplications=[PSCustomObject]@{
 
-    Office16PRO = ( Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Office16.PRO*" ) # Test for office 2016 Pro
-    Office16STD = ( Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Office16.STD*" ) # Test for office 2016 STD
+    Office365 = (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\O365*") # Test for office365 proplus
     Visio16 = (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Office16.VIS*") # Test for visio 2016
     Project16 = (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Office16.PRJ*") # Test for project 2016
-    Office365 = (Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\O365*") # Test for office365 proplus
 
 }
 
@@ -37,7 +36,8 @@ function PromptUser {
     Write-Host "Giving user notice of installation instructions."
 
     $wshell0 = New-Object -ComObject Wscript.Shell
-    $wshell0.Popup("Microsoft Office365 ProPlus has finished downloading, and installation will require you to close and uninstall your version of Office.",0,"IT Notice",0x0)
+    $wshell0.Popup("Microsoft Office365 ProPlus has finished downloading.  
+The installation of Office365 will require you to exit all Office Applications.  When installation is completed, you will need to re-pin your shortcuts for Office Applications to the Start Menu and Taskbar.",0,"IT Notice",0x0)
 
 }
 
@@ -52,22 +52,24 @@ if ( -not ( Test-Path "C:\Temp\Office\*" ) ) {
 
     C:\Temp\OfficeLocal\setup.exe /download C:\Temp\OfficeLocal\Office365ProjectVisioProPlus.xml
 
-}
-
-else    {
+}   else    {
 
     Write-Output "Data files for Office365 are present, download from CDN not needed."
 
 }
 
+if ( $officeApplications.Office365 -eq $true )   {
 
-### Foreach statement to run through the different conditions on which to install or migrate user to Office365 Proplus and Applications ###
+    Write-Host "Office365ProPlus already installed, no further action needed."
 
-Write-Host "Checking for conditions what Applications are needed to be installed..."
+}   else    {
 
-ForEach ($App in $officeApplications)   {
+    ### Foreach statement to run through the different conditions on which to install or migrate user to Office365 Proplus and Applications ###
+    Write-Host "Checking for conditions what Applications are needed to be installed..."
 
-    if ( ( $App.Office16PRO -or $App.Office16STD -eq $true ) -and $App.Visio16 -eq $false -and $App.Project16  -eq $false -and $App.Office365 -eq $false )  {
+    ForEach ( $App in $officeApplications ) {
+
+        if  ( $App.Visio16 -eq $false -and $App.Project16  -eq $false -and $App.Office365 -eq $false )  {
 
         Write-Host "Detetected Office 2016.  Migrating user to Office365 Pro Plus."
 
@@ -77,9 +79,7 @@ ForEach ($App in $officeApplications)   {
 
         RestartExplorer
 
-    }
-
-    elseif ( ( $App.Office16PRO -or $App.Office16STD -eq $true ) -and $App.Visio16 -eq $true -and $App.Project16  -eq $false -and $App.Office365 -eq $false )   {
+        }   elseif ( $App.Visio16 -eq $true -and $App.Project16  -eq $false -and $App.Office365 -eq $false )   {
 
         Write-Host "Detected Office 2016 and Visio 2016.  Migrating user to Office365 ProPlus and Visio."
 
@@ -89,9 +89,7 @@ ForEach ($App in $officeApplications)   {
 
         RestartExplorer
 
-    }
-
-    elseif ( ( $App.Office16PRO -or $App.Office16STD -eq $true ) -and $App.Visio16 -eq $false -and $App.Project16  -eq $true -and $App.Office365 -eq $false )   {
+        }   elseif ( $App.Visio16 -eq $false -and $App.Project16  -eq $true -and $App.Office365 -eq $false )   {
 
         Write-Host "Detected Office 2016 and Project 2016.  Migrating user to Office365 ProPlus and Project."
 
@@ -101,9 +99,7 @@ ForEach ($App in $officeApplications)   {
 
         RestartExplorer
 
-    }
-    
-    elseif ( ( $App.Office16PRO -or $App.Office16STD -eq $true ) -and $App.Visio16 -eq $true -and $App.Project16  -eq $true -and $App.Office365 -eq $false )   {
+        }   elseif ( $App.Visio16 -eq $true -and $App.Project16  -eq $true -and $App.Office365 -eq $false )   {
 
         Write-Host "Detected Office 2016, Visio 2016, and Project 2016.  Migrating user to Office365 ProPlus, Visio, and Project."
 
@@ -112,20 +108,8 @@ ForEach ($App in $officeApplications)   {
         C:\Temp\OfficeLocal\setup.exe /configure C:\Temp\OfficeLocal\Office365ProjectVisioProPlus.xml
 
         RestartExplorer
-
-    }
-
-    elseif ( $App.Office365 -eq $true )   {
-
-        Write-Host "Office365ProPlus already installed, no further action needed."
-
-    }
-
-    else    {
-
-        Write-Host "Error: the conditions outlined in this script could not be met."
-
-        Write-Host "Error: there was a problem with the script, please check with the user."
+        
+        }
 
     }
 
